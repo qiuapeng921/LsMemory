@@ -2,7 +2,11 @@
 
 #include "Constant.h"
 
+// #include "ReadMemory.h"
+// #include "WriteMemory.h"
+// #include "GetModuleBase.h"
 
+// 初始化驱动句柄
 NTSTATUS InitDeviceSymbolic(PDRIVER_OBJECT Driver) {
 	NTSTATUS status = STATUS_SUCCESS;
 	PDEVICE_OBJECT pdeojb = { 0 };
@@ -34,6 +38,7 @@ NTSTATUS InitDeviceSymbolic(PDRIVER_OBJECT Driver) {
 
 }
 
+// 转发创建关闭
 NTSTATUS DispatchCreateClose(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 {
 	UNREFERENCED_PARAMETER(pDevObj);
@@ -45,6 +50,7 @@ NTSTATUS DispatchCreateClose(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 	return STATUS_SUCCESS;
 }
 
+// Ioc通讯
 NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 {
 	UNREFERENCED_PARAMETER(pDevObj);
@@ -57,17 +63,29 @@ NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 	KdPrint(("[LsMemory]:failed to create device\n"));
 
 	switch (code) {
-	case IOCTL_GET_SECTION_ADDRESS:
-		KdPrint(("获取段地址!\n"));
+	case IoctlIoMemoryCard:
+		KdPrint(("卡密验证!\n"));
 		break;
-	case IOCTL_WRITE_MEMORY:
-		KdPrint(("写内存!\n"));
+	case IoctlIoMemoryReadWriteMod:
+		KdPrint(("读写模式!\n"));
 		break;
-	case IOCTL_ALLOCATE_MEMORY:
-		KdPrint(("申请内存!\n"));
+	case IoctlIoMemoryModuleAddress:
+		KdPrint(("取模块地址!\n"));
 		break;
-	case IOCTL_FREE_MEMORY:
-		KdPrint(("释放内存!\n"));
+	case IoctlIoMemoryRead:
+		KdPrint(("读取内存!\n"));
+		break;
+	case IoctlIoMemoryWrite:
+		KdPrint(("写入内存!\n"));
+		break;
+	case IoctlIoMemoryAlloc:
+		KdPrint(("申请/释放内存!\n"));
+		break;
+	case IoctlIoMemoryHiddenProcess:
+		KdPrint(("隐藏进程!\n"));
+		break;
+	case IoctlIoMemoryProtectProcess:
+		KdPrint(("保护进程!\n"));
 		break;
 	default:
 		KdPrint(("无效的 IOCTL 代码: 0x%X\n", code));
@@ -80,6 +98,7 @@ NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 	return STATUS_SUCCESS;
 }
 
+// 驱动卸载
 void DriverUnload(PDRIVER_OBJECT pDrvObj)
 {
 	UNICODE_STRING usSymboName;
@@ -91,6 +110,7 @@ void DriverUnload(PDRIVER_OBJECT pDrvObj)
 	}
 }
 
+// 驱动入口
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDrvObj, PUNICODE_STRING pRegPath)
 {
 	NTSTATUS status = STATUS_SUCCESS;

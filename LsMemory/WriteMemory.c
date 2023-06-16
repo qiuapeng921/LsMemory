@@ -1,4 +1,5 @@
 #include"WriteMemory.h"
+
 NTSTATUS NTAPI NtProtectVirtualMemory(
 
 	IN HANDLE               ProcessHandle,

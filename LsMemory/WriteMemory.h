@@ -1,6 +1,6 @@
-#pragma once
 #include<ntifs.h>
 #include<intrin.h>
+
 NTSTATUS MmCopyVirtualMemory(
 	IN PEPROCESS FromProcess,
 	IN CONST VOID* FromAddress,
