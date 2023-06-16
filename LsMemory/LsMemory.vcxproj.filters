@@ -22,7 +22,13 @@
     <ClCompile Include="入口.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="读写.c">
+    <ClCompile Include="ReadMemory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WriteMemory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GetModuleBase.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,7 +36,13 @@
     <ClInclude Include="标头.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="读写.h">
+    <ClInclude Include="ReadMemory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WriteMemory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GetModuleBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

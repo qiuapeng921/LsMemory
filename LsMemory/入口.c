@@ -1,7 +1,6 @@
 #include <ntddk.h>
 
 #include "标头.h"
-#include "读写.h"
 
 
 NTSTATUS InitDeviceSymbolic(PDRIVER_OBJECT Driver) {
@@ -69,15 +68,6 @@ NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 		break;
 	case IOCTL_FREE_MEMORY:
 		KdPrint(("释放内存!\n"));
-		break;
-	case IOCTL_MAP_MEMORY:
-		KdPrint(("映射内存!\n"));
-		break;
-	case IOCTL_UNMAP_MEMORY:
-		KdPrint(("取消映射内存!\n"));
-		break;
-	case IOCTL_DUMP_AND_RESET_CALLBACK:
-		KdPrint(("转储和重置回调!\n"));
 		break;
 	default:
 		KdPrint(("无效的 IOCTL 代码: 0x%X\n", code));
