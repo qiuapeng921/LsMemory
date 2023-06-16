@@ -158,13 +158,13 @@
     <ClCompile Include="GetModuleBase.c" />
     <ClCompile Include="ReadMemory.c" />
     <ClCompile Include="WriteMemory.c" />
-    <ClCompile Include="入口.c" />
+    <ClCompile Include="Entry.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GetModuleBase.h" />
     <ClInclude Include="ReadMemory.h" />
     <ClInclude Include="WriteMemory.h" />
-    <ClInclude Include="标头.h" />
+    <ClInclude Include="Constant.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

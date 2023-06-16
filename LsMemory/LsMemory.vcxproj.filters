@@ -19,7 +19,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="入口.c">
+    <ClCompile Include="Entry.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ReadMemory.c">
@@ -33,7 +33,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="标头.h">
+    <ClInclude Include="Constant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ReadMemory.h">
