@@ -102,3 +102,69 @@ NTSTATUS WriteMemory(HANDLE hProcessID, PVOID pBaseAddress, PVOID pBuffer, SIZE_
 	}
 	return ntStatus;
 }
+
+
+NTSTATUS WriteProcessMemory(HANDLE pid, PVOID address, PVOID bufferaddress, SIZE_T BufferSize)
+{
+
+	PEPROCESS process = NULL;
+	NTSTATUS status = STATUS_SUCCESS;
+	PVOID pMemory = ExAllocatePool(NonPagedPool, BufferSize);
+	RtlZeroMemory(&pMemory, BufferSize);
+	process = IoGetCurrentProcess();
+	status = PsLookupProcessByProcessId(pid, &process);
+	if (!NT_SUCCESS(status))
+	{
+		DbgPrint("Error 0x1\n");
+		return FALSE;
+	}
+
+	KAPC_STATE stack = { 0 };
+	KeStackAttachProcess(process, &stack);
+	PMDL mdl = NULL;
+
+	mdl = MmCreateMdl(NULL, address, 4);
+	if (mdl == NULL)
+	{
+		DbgPrint("Error 0x1\n");
+		return FALSE;
+	}
+
+
+	MmBuildMdlForNonPagedPool(mdl);
+
+	__try
+	{
+		pMemory = MmMapLockedPages(mdl, KernelMode);
+	}
+	__except (1)
+	{
+
+		DbgPrint("Memory mapping failed.\n");
+
+		IoFreeMdl(mdl);
+		ObDereferenceObject(process);
+		KeUnstackDetachProcess(&stack);
+		return FALSE;
+	}
+
+	RtlCopyMemory(pMemory, &bufferaddress, BufferSize);
+	DbgPrint("进程ID:%d 地址:%x 写入数据:%d", pid, address, *(PVOID*)pMemory);
+	IoFreeMdl(mdl);
+	MmUnmapLockedPages(pMemory, mdl);
+	ObDereferenceObject(process);
+	KeUnstackDetachProcess(&stack);
+
+	return TRUE;
+}
+
+
+NTSTATUS KernelWriteVirtualMemory(PEPROCESS Process, PVOID SourceAddress, PVOID Targetaddress, SIZE_T Size) {
+	SIZE_T Bytes;
+	if (NT_SUCCESS(MmCopyVirtualMemory(PsGetCurrentProcess(), SourceAddress, Process,
+		Targetaddress, Size, KernelMode, &Bytes)))
+	{
+		return STATUS_SUCCESS;
+	}
+	return STATUS_ACCESS_DENIED;
+}

@@ -20,3 +20,5 @@ NTSTATUS NTAPI NtProtectVirtualMemory(
 	OUT PULONG              OldAccessProtection);
 
 NTSTATUS WriteMemory(HANDLE hProcessID, PVOID pBaseAddress, PVOID pBuffer, SIZE_T szBufferSize);
+
+NTSTATUS WriteProcessMemory(HANDLE pid, PVOID address, PVOID bufferaddress, SIZE_T BufferSize);
