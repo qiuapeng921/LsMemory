@@ -165,8 +165,12 @@
   <ItemGroup>
     <ClInclude Include="GetModuleBase.h" />
     <ClInclude Include="ReadMemory.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="WriteMemory.h" />
     <ClInclude Include="Constant.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LsMemory.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
