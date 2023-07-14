@@ -2,11 +2,26 @@
 UNICODE_STRING usDeivceName = RTL_CONSTANT_STRING(L"\\Device\\LsMemory");
 UNICODE_STRING usSymbolicName = RTL_CONSTANT_STRING(L"\\??\\LsMemory");
 
-#define IoctlIoMemoryCard               CTL_CODE(FILE_DEVICE_UNKNOWN, 801, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 卡密验证
-#define IoctlIoMemoryReadWriteMod		CTL_CODE(FILE_DEVICE_UNKNOWN, 802, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 内存_读写模式
-#define IoctlIoMemoryModuleAddress      CTL_CODE(FILE_DEVICE_UNKNOWN, 803, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 内存_取模块地址
-#define IoctlIoMemoryRead               CTL_CODE(FILE_DEVICE_UNKNOWN, 804, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 内存_读取
-#define IoctlIoMemoryWrite				CTL_CODE(FILE_DEVICE_UNKNOWN, 805, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 内存_写入
-#define IoctlIoMemoryAlloc              CTL_CODE(FILE_DEVICE_UNKNOWN, 806, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 内存_申请/释放
-#define IoctlIoMemoryHiddenProcess      CTL_CODE(FILE_DEVICE_UNKNOWN, 807, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 隐藏进程
-#define IoctlIoMemoryProtectProcess     CTL_CODE(FILE_DEVICE_UNKNOWN, 808, METHOD_BUFFERED, FILE_ANY_ACCESS)	// 保护进程
+#define IoctlCard						CTL_CODE(FILE_DEVICE_UNKNOWN, 801, METHOD_BUFFERED, FILE_ANY_ACCESS) // 卡密验证
+#define IoctlReadWriteMod				CTL_CODE(FILE_DEVICE_UNKNOWN, 802, METHOD_BUFFERED, FILE_ANY_ACCESS) // 读写模式
+#define IoctlModuleAddress				CTL_CODE(FILE_DEVICE_UNKNOWN, 803, METHOD_BUFFERED, FILE_ANY_ACCESS) // 取模块地址
+#define IoctlModuleFuncAddress			CTL_CODE(FILE_DEVICE_UNKNOWN, 804, METHOD_BUFFERED, FILE_ANY_ACCESS) // 取模块函数地址
+#define IoctlRead						CTL_CODE(FILE_DEVICE_UNKNOWN, 805, METHOD_BUFFERED, FILE_ANY_ACCESS) // 读取数据
+#define IoctlWrite						CTL_CODE(FILE_DEVICE_UNKNOWN, 806, METHOD_BUFFERED, FILE_ANY_ACCESS) // 写入数据
+#define IoctlAlloc						CTL_CODE(FILE_DEVICE_UNKNOWN, 807, METHOD_BUFFERED, FILE_ANY_ACCESS) // 申请内存
+#define IoctlFree						CTL_CODE(FILE_DEVICE_UNKNOWN, 808, METHOD_BUFFERED, FILE_ANY_ACCESS) // 释放内存
+#define IoctlHiddenProcessOn			CTL_CODE(FILE_DEVICE_UNKNOWN, 809, METHOD_BUFFERED, FILE_ANY_ACCESS) // 隐藏进程-开启
+#define IoctlHiddenProcessOff			CTL_CODE(FILE_DEVICE_UNKNOWN, 810, METHOD_BUFFERED, FILE_ANY_ACCESS) // 隐藏进程-关闭
+#define IoctlProtectProcessOn			CTL_CODE(FILE_DEVICE_UNKNOWN, 811, METHOD_BUFFERED, FILE_ANY_ACCESS) // 保护进程-开启
+#define IoctlProtectProcessOff			CTL_CODE(FILE_DEVICE_UNKNOWN, 812, METHOD_BUFFERED, FILE_ANY_ACCESS) // 保护进程-关闭
+
+
+
+// 定义结构
+typedef struct _DataStruct
+{
+	ULONG	ProcessPid;
+	PVOID	TargetAddress;
+	ULONG	Length;
+	PVOID	Buffer;
+} DataStruct, * PDataStruct;

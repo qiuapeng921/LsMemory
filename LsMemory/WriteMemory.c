@@ -168,3 +168,178 @@ NTSTATUS KernelWriteVirtualMemory(PEPROCESS Process, PVOID SourceAddress, PVOID 
 	}
 	return STATUS_ACCESS_DENIED;
 }
+
+
+
+NTSTATUS WriteMemory_MDL(IN ULONG ProcessPid, IN  PVOID BaseAddress, IN ULONG Length, IN PVOID Buffer)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PEPROCESS pEProcess = NULL;
+	KAPC_STATE ApcState = { 0 };
+	PMDL pMdl = NULL;
+	PVOID pNewAddress = NULL;
+	PVOID temp_buff = NULL;
+
+	if ((ULONG64)BaseAddress <= 0x10000 || (ULONG64)BaseAddress > 0x7fffffffffff)  //判断写入地址是否有效
+	{
+		DbgPrint("[+]MmIsAddressValid:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	temp_buff = ExAllocatePool(NonPagedPool, Length);  //申请内核地址
+	if (temp_buff == NULL)
+	{
+		DbgPrint("[+]ExAllocatePool:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+	RtlCopyMemory(temp_buff, Buffer, Length);//把要写入的数据存在内核地址里
+	Status = PsLookupProcessByProcessId((HANDLE)ProcessPid, &pEProcess);
+	if (!NT_SUCCESS(Status))
+	{
+		DbgPrint("[+]PsLookupProcessByProcessId:Fail\n");
+		ExFreePool(temp_buff); //释放内核地址
+		return STATUS_UNSUCCESSFUL;
+	}
+	KeStackAttachProcess(pEProcess, &ApcState);
+
+	pMdl = MmCreateMdl(NULL, BaseAddress, Length);
+	if (pMdl)
+	{
+		MmBuildMdlForNonPagedPool(pMdl);
+		pNewAddress = MmMapLockedPages(pMdl, KernelMode); //锁定MDL页面
+		if (pNewAddress)
+		{
+			RtlCopyMemory(pNewAddress, temp_buff, Length);
+			MmUnmapLockedPages(pNewAddress, pMdl); //解锁MDL页面
+			Status = STATUS_SUCCESS;
+		}
+		else
+		{
+			Status = STATUS_UNSUCCESSFUL;
+		}
+		IoFreeMdl(pMdl);//释放创建的MDL
+	}
+
+	KeUnstackDetachProcess(&ApcState);
+	ObDereferenceObject(pEProcess);
+	ExFreePool(temp_buff); //释放内核地址
+	return Status;
+}
+
+
+NTSTATUS ReadMemory1(IN ULONG ProcessPid, IN  PVOID BaseAddress, IN ULONG Length, OUT PVOID Buffer)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PEPROCESS pEProcess = NULL;
+	KAPC_STATE ApcState = { 0 };
+	Status = PsLookupProcessByProcessId((HANDLE)ProcessPid, &pEProcess);
+	if (!NT_SUCCESS(Status))
+	{
+		DbgPrint("[+]PsLookupProcessByProcessId:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+	KeStackAttachProcess(pEProcess, &ApcState);
+	__try
+	{
+		ProbeForRead(BaseAddress, Length, 1);//校验是否可读
+		RtlCopyMemory(Buffer, BaseAddress, Length); //读取进程数据
+		Status = STATUS_SUCCESS;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		Status = STATUS_UNSUCCESSFUL;
+
+		RtlZeroMemory(Buffer, Length); //清零返回值
+	}
+	KeUnstackDetachProcess(&ApcState);
+	ObDereferenceObject(pEProcess);
+	return Status;
+}
+
+NTSTATUS WriteMemory1(IN ULONG ProcessPid, IN  PVOID BaseAddress, IN ULONG Length, IN PVOID Buffer)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PEPROCESS pEProcess = NULL;
+	KAPC_STATE ApcState = { 0 };
+
+
+	PVOID temp_buff = ExAllocatePool(NonPagedPool, Length);  //申请内核地址
+	if (temp_buff == NULL)
+	{
+		DbgPrint("[+]ExAllocatePool:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+	RtlCopyMemory(temp_buff, Buffer, Length);//把要写入的数据存在内核地址里
+
+	Status = PsLookupProcessByProcessId((HANDLE)ProcessPid, &pEProcess);
+	if (!NT_SUCCESS(Status))
+	{
+		DbgPrint("[+]PsLookupProcessByProcessId:Fail\n");
+		ExFreePool(temp_buff); //释放内核地址
+		return STATUS_UNSUCCESSFUL;
+	}
+	KeStackAttachProcess(pEProcess, &ApcState);
+	__try
+	{
+		ProbeForWrite(BaseAddress, Length, 1);//校验是否可写
+		RtlCopyMemory(BaseAddress, temp_buff, Length); //读取进程数据
+		Status = STATUS_SUCCESS;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+		Status = STATUS_UNSUCCESSFUL;
+	}
+	KeUnstackDetachProcess(&ApcState);
+	ObDereferenceObject(pEProcess);
+	ExFreePool(temp_buff); //释放内核地址
+	return Status;
+}
+
+
+NTSTATUS AllocMemory(IN ULONG ProcessPid, IN SIZE_T Length, OUT PVOID Buffer)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PEPROCESS pEProcess = NULL;
+	KAPC_STATE ApcState = { 0 };
+	PVOID alloc_Address = NULL;
+	SIZE_T alloc_lenght = Length;
+
+	Status = PsLookupProcessByProcessId((HANDLE)ProcessPid, &pEProcess);
+	if (!NT_SUCCESS(Status))
+	{
+		DbgPrint("[+]PsLookupProcessByProcessId:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+	KeStackAttachProcess(pEProcess, &ApcState);
+
+	Status = ZwAllocateVirtualMemory(NtCurrentProcess(), &alloc_Address, 0, &alloc_lenght, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+	if (NT_SUCCESS(Status))
+	{
+		*(PVOID*)Buffer = alloc_Address;
+	}
+	KeUnstackDetachProcess(&ApcState);
+	ObDereferenceObject(pEProcess);
+	return Status;
+}
+
+NTSTATUS FreeMemory(IN ULONG ProcessPid, IN PVOID BaseAddress)
+{
+	NTSTATUS Status = STATUS_SUCCESS;
+	PEPROCESS pEProcess = NULL;
+	KAPC_STATE ApcState = { 0 };
+	SIZE_T alloc_lenght = 0;
+
+	Status = PsLookupProcessByProcessId((HANDLE)ProcessPid, &pEProcess);
+	if (!NT_SUCCESS(Status))
+	{
+		DbgPrint("[+]PsLookupProcessByProcessId:Fail\n");
+		return STATUS_UNSUCCESSFUL;
+	}
+	KeStackAttachProcess(pEProcess, &ApcState);
+
+	Status = ZwFreeVirtualMemory(NtCurrentProcess(), &BaseAddress, &alloc_lenght, MEM_RELEASE);
+
+	KeUnstackDetachProcess(&ApcState);
+	ObDereferenceObject(pEProcess);
+	return Status;
+}

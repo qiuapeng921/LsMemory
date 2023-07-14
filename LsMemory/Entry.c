@@ -49,61 +49,81 @@ NTSTATUS DispatchCreateClose(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 	return STATUS_SUCCESS;
 }
 
-typedef struct _PROCESS_MEMORY_OPERATION
-{
-	ULONG_PTR ProcessId;
-	PVOID Address;
-	PVOID Buffer;
-	ULONG Size;
-} PROCESS_MEMORY_OPERATION, * PPROCESS_MEMORY_OPERATION;
 
 // Ioc通讯
-
 NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
 {
-    UNREFERENCED_PARAMETER(pDevObj);
+	UNREFERENCED_PARAMETER(pDevObj);
+	NTSTATUS Status = STATUS_SUCCESS;
+	PIO_STACK_LOCATION  IoStackLocation = NULL;
+	PVOID InputData = NULL, OutputData = NULL;
+	ULONG InputDataLength = 0, OutputDataLength = 0, IoControlCode = 0;
 
-    PIO_STACK_LOCATION pIrpStack = IoGetCurrentIrpStackLocation(pIrp);
-    ULONG ulControlCode = pIrpStack->Parameters.DeviceIoControl.IoControlCode;
-    PVOID pBuffer = pIrp->AssociatedIrp.SystemBuffer;
-    ULONG ulBufferSize = pIrpStack->Parameters.DeviceIoControl.InputBufferLength;
-    NTSTATUS status = STATUS_SUCCESS;
+	IoStackLocation = IoGetCurrentIrpStackLocation(pIrp);
+	IoControlCode = IoStackLocation->Parameters.DeviceIoControl.IoControlCode;
+	InputData = pIrp->AssociatedIrp.SystemBuffer;
+	OutputData = pIrp->AssociatedIrp.SystemBuffer;
+	InputDataLength = IoStackLocation->Parameters.DeviceIoControl.InputBufferLength;
+	OutputDataLength = IoStackLocation->Parameters.DeviceIoControl.OutputBufferLength;
 
-    switch (ulControlCode) {
-    case IoctlIoMemoryCard:
+
+    switch (IoControlCode) {
+    case IoctlCard:
         KdPrint(("卡密验证!\n"));
         break;
-    case IoctlIoMemoryReadWriteMod:
+    case IoctlReadWriteMod:
         KdPrint(("读写模式!\n"));
         break;
-    case IoctlIoMemoryModuleAddress:
+    case IoctlModuleAddress:
         KdPrint(("取模块地址!\n"));
         break;
-    case IoctlIoMemoryRead:
-        KdPrint(("读取内存!\n"));
+    case IoctlModuleFuncAddress:
+        KdPrint(("取模块函数地址!\n"));
         break;
-    case IoctlIoMemoryWrite:
-        KdPrint(("写入内存!\n"));
+    case IoctlRead:
+        KdPrint(("读取数据!\n"));
+		// ReadMemory1(((PDataStruct)InputData)->ProcessPid, ((PDataStruct)InputData)->TargetAddress, ((PDataStruct)InputData)->Length, OutputData);
+		Status = STATUS_SUCCESS;
         break;
-    case IoctlIoMemoryAlloc:
-        KdPrint(("申请/释放内存!\n"));
+    case IoctlWrite:
+        KdPrint(("写入数据!\n"));
+		WriteMemory(((PDataStruct)InputData)->ProcessPid, ((PDataStruct)InputData)->TargetAddress, ((PDataStruct)InputData)->Length, ((PDataStruct)InputData)->Buffer);
+		Status = STATUS_SUCCESS;
         break;
-    case IoctlIoMemoryHiddenProcess:
-        KdPrint(("隐藏进程!\n"));
+    case IoctlAlloc:
+        KdPrint(("申请内存!\n"));
         break;
-    case IoctlIoMemoryProtectProcess:
-        KdPrint(("保护进程!\n"));
+    case IoctlFree:
+        KdPrint(("释放内存!\n"));
+        break;
+    case IoctlHiddenProcessOn:
+        KdPrint(("隐藏进程-开启!\n"));
+        break;
+    case IoctlHiddenProcessOff:
+        KdPrint(("隐藏进程-关闭!\n"));
+        break;
+    case IoctlProtectProcessOn:
+        KdPrint(("保护进程-开启!\n"));
+        break;
+    case IoctlProtectProcessOff:
+        KdPrint(("保护进程-关闭!\n"));
         break;
     default:
-        KdPrint(("无效的 IOCTL 代码: 0x%X\n", ulControlCode));
-        status = STATUS_INVALID_DEVICE_REQUEST;
+        KdPrint(("无效的 IOCTL 代码: 0x%X\n", IoControlCode));
+		Status = STATUS_UNSUCCESSFUL;
         break;
-}
+	}
 
-pIrp->IoStatus.Information = ulBufferSize;
-pIrp->IoStatus.Status = status;
-IoCompleteRequest(pIrp, IO_NO_INCREMENT);
-return status;
+
+	pIrp->IoStatus.Information = 0;
+	if (Status == STATUS_SUCCESS)
+	{
+		pIrp->IoStatus.Information = OutputDataLength;
+	}
+
+	pIrp->IoStatus.Status = Status;
+	IoCompleteRequest(pIrp, IO_NO_INCREMENT);
+	return Status;
 }
 
 // 驱动卸载
@@ -134,7 +154,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDrvObj, PUNICODE_STRING pRegPath)
 		return status;
 	}
 
-    pDrvObj->MajorFunction[IRP_MJ_CREATE] = pDrvObj->MajorFunction[IRP_MJ_CLOSE] = DispatchCreateClose;
+	pDrvObj->MajorFunction[IRP_MJ_CREATE] = DispatchCreateClose;
+	pDrvObj->MajorFunction[IRP_MJ_CLOSE] = DispatchCreateClose;
 	pDrvObj->MajorFunction[IRP_MJ_DEVICE_CONTROL] = DispatchIoctl;
 
 	return status;
