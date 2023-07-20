@@ -15,8 +15,6 @@ UNICODE_STRING usSymbolicName = RTL_CONSTANT_STRING(L"\\??\\LsMemory");
 #define IoctlProtectProcessOn			CTL_CODE(FILE_DEVICE_UNKNOWN, 811, METHOD_BUFFERED, FILE_ANY_ACCESS) // 保护进程-开启
 #define IoctlProtectProcessOff			CTL_CODE(FILE_DEVICE_UNKNOWN, 812, METHOD_BUFFERED, FILE_ANY_ACCESS) // 保护进程-关闭
 
-
-
 // 定义结构
 typedef struct _DataStruct
 {

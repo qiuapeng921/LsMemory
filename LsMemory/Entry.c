@@ -1,9 +1,6 @@
 #include <ntifs.h>
 
 #include "Constant.h"
-#include "ReadMemory.h"
-#include "WriteMemory.h"
-#include "GetModuleBase.h"
 
 // 初始化驱动句柄
 NTSTATUS InitDeviceSymbolic(PDRIVER_OBJECT Driver) {
@@ -13,26 +10,19 @@ NTSTATUS InitDeviceSymbolic(PDRIVER_OBJECT Driver) {
 	status = IoCreateDevice(Driver, 0, &usDeivceName, FILE_DEVICE_UNKNOWN, 0, 0, &pdeojb);
 
 	if (!NT_SUCCESS(status)) {
-
 		KdPrint(("[LsMemory]:failed to create device\n"));
-
 		return status;
-
 	}
 
 	status = IoCreateSymbolicLink(&usSymbolicName, &usDeivceName);
 
 	if (!NT_SUCCESS(status)) {
-
 		IoDeleteDevice(pdeojb);
-
 		KdPrint(("[LsMemory]:failed to create symbolic name\n"));
-
 		return status;
 	}
 
 	KdPrint(("[LsMemory]:Create Link Success\n"));
-
 	return status;
 
 }
@@ -87,7 +77,7 @@ NTSTATUS DispatchIoctl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
         break;
     case IoctlWrite:
         KdPrint(("写入数据!\n"));
-		WriteMemory(((PDataStruct)InputData)->ProcessPid, ((PDataStruct)InputData)->TargetAddress, ((PDataStruct)InputData)->Length, ((PDataStruct)InputData)->Buffer);
+		// WriteMemory(((PDataStruct)InputData)->ProcessPid, ((PDataStruct)InputData)->TargetAddress, ((PDataStruct)InputData)->Length, ((PDataStruct)InputData)->Buffer);
 		Status = STATUS_SUCCESS;
         break;
     case IoctlAlloc:

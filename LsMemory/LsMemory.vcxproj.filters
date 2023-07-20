@@ -22,13 +22,10 @@
     <ClCompile Include="Entry.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReadMemory.c">
+    <ClCompile Include="读写.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WriteMemory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GetModuleBase.c">
+    <ClCompile Include="CR0读写.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,16 +33,16 @@
     <ClInclude Include="Constant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ReadMemory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WriteMemory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GetModuleBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="读写.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CR0读写.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="标头.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -163,17 +163,16 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GetModuleBase.c" />
-    <ClCompile Include="ReadMemory.c" />
-    <ClCompile Include="WriteMemory.c" />
+    <ClCompile Include="CR0读写.c" />
     <ClCompile Include="Entry.c" />
+    <ClCompile Include="读写.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GetModuleBase.h" />
-    <ClInclude Include="ReadMemory.h" />
+    <ClInclude Include="CR0读写.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="WriteMemory.h" />
     <ClInclude Include="Constant.h" />
+    <ClInclude Include="标头.h" />
+    <ClInclude Include="读写.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LsMemory.rc" />
